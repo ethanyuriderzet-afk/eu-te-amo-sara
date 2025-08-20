@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mapa do Amor Interativo</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; font-family: 'Arial', sans-serif; background: #fdf0f0; color: #333; text-align: center;
+  }
+  header {
+    background: pink; padding: 20px; font-size: 24px;
+  }
+  .map-section {
+    padding: 30px 10px;
+  }
+  .map-container {
+    position: relative; max-width: 700px; margin: 0 auto; width: 90vw; aspect-ratio: 7 / 4;
+  }
+  .map {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+  }
+  .city {
+    position: absolute; font-size: 1.2rem; font-weight: bold; color: red; user-select: none; white-space: nowrap; transform: translate(-50%, -50%);
+  }
+  .city-a { top: 72.5%; left: 29.5%; }
+  .city-b { top: 42.5%; left: 66%; }
+  .line {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible;
+  }
+  line {
+    stroke: red; stroke-width: 2; animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { stroke-opacity: 0.2; }
+    50% { stroke-opacity: 1; }
+    100% { stroke-opacity: 0.2; }
+  }
+  .countdown {
+    padding: 30px 10px; background: #fff0f6; font-size: 1.5rem;
+  }
+  .stars {
+    padding: 40px 10px; background: #0b1d39; color: white;
+  }
+  .sky {
+    position: relative; width: 90vw; max-width: 700px; height: 300px; background: black; margin: 0 auto; overflow: hidden; border-radius: 8px;
+  }
+  .star {
+    width: 12px; height: 12px; background: white; border-radius: 50%; position: absolute; animation: twinkle 2s infinite; cursor: pointer; user-select: none; box-shadow: 0 0 8px white; transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  #message-box {
+    margin: 20px auto 0; padding: 10px; background: white; color: black; border-radius: 5px; max-width: 80%; opacity: 0; transition: opacity 0.5s ease-in-out; user-select: none;
+  }
+  #message-box.show {
+    opacity: 1;
+  }
+  footer {
+    background: pink; padding: 10px; font-size: 1rem;
+  }
+  /* Playlist */
+  .playlist {
+    max-width: 700px;
+    margin: 30px auto;
+  }
+  iframe {
+    width: 100%; 
+    height: 80px; 
+    border: none; 
+    border-radius: 12px;
+  }
+  /* 10 motivos */
+  .motivos {
+    max-width: 700px;
+    margin: 30px auto 60px;
+    text-align: left;
+    background: #ffe6e6;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.3);
+  }
+  .motivos h2 {
+    text-align: center;
+    color: #d81e5b;
+  }
+  .motivos ol {
+    padding-left: 1.2em;
+    font-size: 1.1rem;
+  }
+  .motivos li {
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  /* Coração animado ao clicar na estrela */
+  .heart {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    background: red;
+    transform: rotate(45deg);
+    animation: popUp 0.8s forwards;
+  }
+  .heart::before,
+  .heart::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: red;
+    border-radius: 50%;
+  }
+  .heart::before {
+    top: -10px;
+    left: 0;
+  }
+  .heart::after {
+    left: 10px;
+    top: 0;
+  }
+  @keyframes popUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(0.7) rotate(45deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-50px) scale(1.5) rotate(45deg);
+    }
+  }
+  /* Responsividade */
+  @media (max-width: 400px) {
+    header {
+      font-size: 20px;
+    }
+    .city {
+      font-size: 1rem;
+    }
+    .countdown {
+      font-size: 1.2rem;
+    }
+    .sky {
+      height: 220px;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌍 Nosso Mapa do Amor</h1>
+</header>
+
+<section class="map-section">
+  <div class="map-container" id="mapContainer">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg" alt="Mapa do Amor" class="map" />
+    <div class="city city-a" id="cityA">📍 Porto Alegre</div>
+    <div class="city city-b" id="cityB">📍 Imperatriz - MA</div>
+    <svg class="line" id="lineSVG" xmlns="http://www.w3.org/2000/svg">
+      <line id="connectingLine" />
+    </svg>
+  </div>
+</section>
+
+<section class="countdown">
+  <h2>⏳ Contagem Regressiva</h2>
+  <p id="timer">Carregando...</p>
+</section>
+
+<section class="stars">
+  <h2>✨ Céu Estrelado do Amor</h2>
+  <div class="sky" id="sky"></div>
+  <div id="message-box"></div>
+</section>
+
+<section class="playlist">
+  <h2>🎵 Nossa Musica</h2>
+  <div class="track">
+    <h3>Euphoria</h3>
+    <iframe src="https://open.spotify.com/embed/track/5YMXGBD6vcYP7IolemyLtK" width="300" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  </div>
+   <div class="track">
+    <h3>My You</h3>
+    <iframe src="https://open.spotify.com/embed/track/0pNFrM5L0te1EXGxveeYiR" width="300" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</section>
+
+</section>
+
+<section class="motivos">
+  <h2>10 motivos porque eu te amo</h2>
+  <ol id="motivos-list">
+    <!-- Lista gerada pelo JS -->
+  </ol>
+</section>
+
+<footer>
+  <p>Feito com ❤️</p>
+</footer>
+
+<script>
+  // Atualiza a linha entre cidades responsivamente
+  function updateLine() {
+    const mapContainer = document.getElementById('mapContainer');
+    const cityA = document.getElementById('cityA');
+    const cityB = document.getElementById('cityB');
+    const line = document.getElementById('connectingLine');
+
+    const cityAPos = {
+      x: cityA.offsetLeft + cityA.offsetWidth / 2,
+      y: cityA.offsetTop + cityA.offsetHeight / 2
+    };
+    const cityBPos = {
+      x: cityB.offsetLeft + cityB.offsetWidth / 2,
+      y: cityB.offsetTop + cityB.offsetHeight / 2
+    };
+
+    line.setAttribute('x1', cityAPos.x);
+    line.setAttribute('y1', cityAPos.y);
+    line.setAttribute('x2', cityBPos.x);
+    line.setAttribute('y2', cityBPos.y);
+  }
+  window.addEventListener('resize', updateLine);
+  window.addEventListener('load', updateLine);
+
+  // Contagem regressiva
+  const targetDate = new Date("2025-12-11T00:00:00");
+  const timer = document.getElementById("timer");
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = targetDate - now;
+    if (diff <= 0) {
+      timer.innerText = "É hoje! 💖";
+      return;
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    timer.innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  // Mensagens para as estrelas
+  const mensagens = [
+    "Mesmo com tantos quilômetros entre nós, sinto você pertinho no meu coração a cada instante.",
+    "Você é o motivo das minhas melhores sorrisos e dos meus sonhos mais doces.",
+    "Conto os segundos para o dia em que nossos braços finalmente se encontrem.",
+    "Nosso amor é prova de que distância não é nada quando se tem o coração junto.",
+    "Você é minha paz na tempestade e minha alegria no silêncio da distância.",
+    "Cada mensagem sua ilumina meu dia como uma estrela brilhante no céu.!",
+    "A saudade aperta, mas o amor que sinto por você é mais forte e nunca vai desaparecer.",
+    "No meio da distância, você é o meu porto seguro, meu lar em qualquer lugar.",
+    "Amo cada pedacinho do que somos, mesmo que separados, estamos sempre conectados.",
+    "Nosso amor é uma linda história que desafia o tempo, o espaço e todas as dificuldades."
+  ];
+
+  const sky = document.getElementById("sky");
+  const messageBox = document.getElementById("message-box");
+
+  function createStars() {
+    sky.innerHTML = "";
+    mensagens.forEach(msg => {
+      const star = document.createElement("div");
+      star.classList.add("star");
+      star.dataset.message = msg;
+
+      star.style.top = (Math.random() * 95) + "%";
+      star.style.left = (Math.random() * 95) + "%";
+
+      // Animação ao clicar: pulsar + coração
+      star.addEventListener("click", (e) => {
+        // Mostrar mensagem
+        messageBox.innerText = star.dataset.message;
+        messageBox.classList.add("show");
+        setTimeout(() => messageBox.classList.remove("show"), 4000);
+
+        // Pulsar a estrela
+        star.style.transform = "scale(1.6)";
+        star.style.boxShadow = "0 0 20px 6px #ff4d6d";
+        setTimeout(() => {
+          star.style.transform = "";
+          star.style.boxShadow = "0 0 8px white";
+        }, 500);
+
+        // Criar coração animado
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        const rect = sky.getBoundingClientRect();
+        // Posicionar coração no clique
+        heart.style.left = (e.clientX - rect.left - 10) + "px";
+        heart.style.top = (e.clientY - rect.top - 10) + "px";
+        sky.appendChild(heart);
+        // Remove após animação
+        heart.addEventListener("animationend", () => {
+          heart.remove();
+        });
+      });
+
+      sky.appendChild(star);
+    });
+  }
+  window.addEventListener('resize', createStars);
+  window.addEventListener('load', createStars);
+
+  // 10 motivos porque eu te amo (você pode alterar aqui)
+  const motivos = [
+    "Você me faz sorrir mesmo nos dias difíceis.",
+    "O seu sorriso ilumina o meu dia.",
+    "A forma como você me entende sem palavras.",
+    "Cada momento ao seu lado é inesquecível.",
+    "Sua força e coragem me inspiram todos os dias.",
+    "Você é minha melhor amiga e meu amor.",
+    "Seu jeito único de ver o mundo.",
+    "A confiança e carinho que compartilhamos.",
+    "Você faz meu coração bater mais forte.",
+    "Sou feliz por ter você na minha vida."
+  ];
+
+  const motivosList = document.getElementById("motivos-list");
+  motivos.forEach((motivo) => {
+    const li = document.createElement("li");
+    li.textContent = motivo;
+    motivosList.appendChild(li);
+  });
+</script>
+</body>
+</html>

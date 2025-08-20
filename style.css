@@ -1,0 +1,122 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #fdf0f0;
+  color: #333;
+  text-align: center;
+}
+
+header {
+  background: pink;
+  padding: 20px;
+  font-size: 24px;
+}
+
+.map-section {
+  padding: 30px;
+}
+
+.map-container {
+  position: relative;
+  display: inline-block;
+}
+
+.map {
+  width: 90vw;
+  max-width: 700px;
+}
+
+.city {
+  position: absolute;
+  font-size: 18px;
+  font-weight: bold;
+  color: red;
+}
+
+.city-a {
+  top: 290px; /* Porto Alegre */
+  left: 200px;
+}
+
+.city-b {
+  top: 170px; /* Imperatriz - MA */
+  left: 450px;
+}
+
+.line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 700px;
+  height: 400px;
+  pointer-events: none;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { stroke-opacity: 0.2; }
+  50% { stroke-opacity: 1; }
+  100% { stroke-opacity: 0.2; }
+}
+
+.countdown {
+  padding: 30px;
+  background: #fff0f6;
+  font-size: 24px;
+}
+
+.stars {
+  padding: 40px;
+  background: #0b1d39;
+  color: white;
+}
+
+.sky {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: black;
+  overflow: hidden;
+}
+
+.star {
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  animation: twinkle 2s infinite;
+  cursor: pointer;
+}
+
+.star:nth-child(1) { top: 60px; left: 80px; }
+.star:nth-child(2) { top: 120px; left: 200px; }
+.star:nth-child(3) { top: 180px; left: 350px; }
+
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+#message-box {
+  margin-top: 20px;
+  padding: 10px;
+  background: white;
+  color: black;
+  border-radius: 5px;
+  display: inline-block;
+  max-width: 80%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+#message-box.show {
+  opacity: 1;
+}
+
+footer {
+  background: pink;
+  padding: 10px;
+}
+
